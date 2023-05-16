@@ -12,6 +12,9 @@
 </p>   
 
 O Projeto foi realizado pelos alunos: 
+&nbsp;
 Giovana Perazzolo Menato 
+&nbsp;
 Giovanna Santos Fantacini
+&nbsp;
 Vinicius de Souza Santos 
