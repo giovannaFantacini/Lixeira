@@ -7,3 +7,11 @@
 
   O Circuito do projeto está apresentado abaixo: 
   
+<p>
+   <img src= 'src/Captura de tela 2023-05-16 163157.png'>
+</p>   
+
+O Projeto foi realizado pelos alunos: 
+Giovana Perazzolo Menato 
+Giovanna Santos Fantacini
+Vinicius de Souza Santos 
