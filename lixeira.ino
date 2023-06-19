@@ -1,5 +1,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <WiFi.h>
+#include <LiquidCrystal_I2C.h>
+#include <WiFi.h>
 #include <WiFiClient.h>
 #include <BlynkSimpleEsp32.h>
 #include <HCSR04.h>
@@ -41,16 +43,6 @@ DHTesp dhtSensor;
 
 UltraSonicDistanceSensor distanceSensor(PINO_TRIGGER, PINO_ECHO); 
 
-// Definindo os Estados,
-enum Estado {
-  A, // Estado "VAZIO"
-  B, // Estado "EM USO"
-  C, // Estado "CHEIO"
-  D // Estado "EM ALERTA"
-};
-
-Estado estado;
-  
 
 void setup() {
   Serial.begin(115200);
@@ -59,7 +51,7 @@ void setup() {
   lcd.backlight();
   Blynk.begin(auth, ssid, pass);
 
-  dhtSensor.setup(15, DHTesp::DHT22);
+  dhtSensor.setup(27, DHTesp::DHT11);
   
   while (!Serial) {
     ; /* Somente vai em frente quando a serial estiver pronta para funcionar */
@@ -124,7 +116,6 @@ void task_sensor_hum( void *pvParameters )
     int adc_read= 0;
     UBaseType_t uxHighWaterMark;
     TempAndHumidity  data;
-    Estado estado;
     int alerta;
 
     Blynk.run(); 
@@ -132,7 +123,6 @@ void task_sensor_hum( void *pvParameters )
     while(1)
     {   
         data = dhtSensor.getTempAndHumidity();
-        Blynk.virtualWrite(V0, data.temperature); 
         Blynk.virtualWrite(V1, data.humidity); 
 
         if (data.humidity < 20.00 || data.humidity > 90.00){
@@ -162,7 +152,7 @@ void task_lcd( void *pvParameters )
     TempAndHumidity  data_rcv;
     String msg;
     UBaseType_t uxHighWaterMark;
-    Estado estado;
+    int estado;
     int alerta;
 
 
@@ -175,14 +165,16 @@ void task_lcd( void *pvParameters )
         if(alerta == 1){
            msg = "EM ALERTA";
         }else{
-          if (estado == A){
+          if (estado == 2){
             msg = "VAZIO";
-          }else if(estado == B){
+          }else if(estado == 3){
             msg = "EM USO";
-          }else if(estado == C){
+          }else if(estado == 4){
             msg = "CHEIO";
           }
         }
+
+        Blynk.virtualWrite(V0, msg); 
         
         lcd.clear();
         
@@ -206,7 +198,7 @@ void task_sensor_dist( void *pvParameters )
     int adc_read= 0;
     UBaseType_t uxHighWaterMark;
     float distancia;
-    Estado estado;
+    int estado;
 
     Blynk.run(); 
 
@@ -216,12 +208,12 @@ void task_sensor_dist( void *pvParameters )
         distancia = distanceSensor.measureDistanceCm();
 
        
-        if (distancia > 9.50 and distancia < 13.0) {
-          estado = A;
-        } else if (distancia < 9.5 and distancia > 4.2) {
-          estado = B;
-        } else if (distancia < 4.2) {
-          estado = C;
+        if (distancia > 25.00 and distancia < 32.0) {
+          estado = 2;
+        } else if (distancia < 25.00 and distancia > 5.00) {
+          estado = 3;
+        } else if (distancia < 5.0) {
+          estado = 4;
         }
   
         xQueueOverwrite(xQueue_ESTADO, (void *)&estado);
